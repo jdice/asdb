@@ -13,61 +13,59 @@ Refer to http://hardwarefun.com/tutorials/parsing-json-in-arduino
 
 #include <aJSON.h>
 
-// function definitions
+/* Input JSON below, copy-paste this and send it via Serial:
 
-// {"dataSource":1,"status":{"stopOverrides":true,"drivetrainEnabled":false,"steeringEnabled":true,"waypointBehavior":"s","adjustMySpeed":false,"trackingGPS":true,"goalSpeed":4.00},"swag":{"ubLights":true,"tailLights":false,"musicId":1},"manual":{"manualAutomatic":12.34567,"normEsc":0.00,"normSteering":0.00},"gps":{"remoteLat":12.34567,"remoteLon":12.34567}}
+{"dataSource":1,"status":{"stopOverrides":true,"drivetrainEnabled":false,"steeringEnabled":true,"waypointBehavior":"s","adjustMySpeed":false,"trackingGPS":true,"goalSpeed":4.00},"swag":{"ubLights":true,"tailLights":false,"musicId":1},"manual":{"manualAutomatic":12.34567,"normEsc":0.00,"normSteering":0.00},"gps":{"remoteLat":12.34567,"remoteLon":12.34567}}
 
-// Json string to parse
-//char jsonString[] = "{\"dataSource\":1,\"status\":{\"stopOverrides\":true,\"drivetrainEnabled\":false,\"steeringEnabled\":true,\"waypointBehavior\":\"1\",\"adjustMySpeed\":false,\"trackingGPS\":true,\"goalSpeed\":4.00},\"swag\":{\"ubLights\":true,\"tailLights\":false,\"musicId\":1},\"manual\":{\"manualAutomatic\":12.34567,\"normEsc\":0.00,\"normSteering\":0.00},\"gps\":{\"remoteLat\":12.34567,\"remoteLon\":12.34567}}";
-//char jsonString[] = "{\"dataSource\":2,\"status\":{\"stopOverrides\":true,\"drivetrainEnabled\":false,\"steeringEnabled\":true,\"waypointBehavior\":\"s\",\"adjustMySpeed\":false,\"trackingGPS\":true,\"goalSpeed\":4.00},\"swag\":{\"ubLights\":true,\"tailLights\":false,\"musicId\":1},\"manual\":{\"manualMode\":false,\"normEsc\":0.00,\"normSteering\":0.00}}";
-//char jsonString[] = "{\"dataSource\":2,\"status\":{\"stopOverrides\":true,\"drivetrainEnabled\":false,\"steeringEnabled\":true},\"query\":{\"count\":1,\"created\":\"2012-08-04T14:46:03Z\",\"lang\":\"en-US\",\"results\":{\"item\":{\"title\":false}}}}";
+*/
 
+const bool jsonDebug = false;
 const int ledPin = 13;
 
 // main message variables
-  int dataSource;
+int dataSource;
 
 // status variables
-  bool stopOverrides, drivetrainEnabled, steeringEnabled, adjustMySpeed, trackingGPS;
-  char waypointBehavior = 'l';
-  float goalSpeed;
+bool stopOverrides, drivetrainEnabled, steeringEnabled, adjustMySpeed, trackingGPS;
+char waypointBehavior = 'l';
+float goalSpeed;
   
 // swag variables
-  bool ubLights, tailLights;
-  int musicId;
-  
+bool ubLights, tailLights;
+int musicId;
+
 // manual variables
-  bool manualMode;
-  float normEsc, normSteering;
+bool manualMode;
+float normEsc, normSteering;
 
 // gps variables
-  float remoteLat, remoteLon; 
+float remoteLat, remoteLon; 
 
 aJsonStream serial_stream(&Serial);
 
 void setup(){
     Serial.begin(57600);
-    Serial.println("Ready.");
-    //Serial.print("JSON: ");
-    //Serial.println(jsonString);
+    if(jsonDebug){
+      Serial.println("Ready.");
+    }
 }
 
-/**
- * Parse the JSON String. Uses aJson library
- * 
- * Refer to http://hardwarefun.com/tutorials/parsing-json-in-arduino
- */
-
 void processMessage(aJsonObject* myMessage){
-  Serial.println("Starting to parse");
+  if(jsonDebug){
+    Serial.println("Starting to parse");
+  }
   
   if(myMessage != NULL){
-    printNameAndTypeFromJSON(myMessage, "myMessage");
+    if(jsonDebug){
+      printNameAndTypeFromJSON(myMessage, "myMessage");
+    }
     updateIntFromJSON(&dataSource, myMessage, "dataSource");
     
     aJsonObject* myStatus = aJson.getObjectItem(myMessage, "status");
     if(myStatus != NULL){
-      printNameAndTypeFromJSON(myStatus, "myStatus");
+      if(jsonDebug){
+        printNameAndTypeFromJSON(myStatus, "myStatus");
+      }
       updateBoolFromJSON(&stopOverrides, myStatus, "stopOverrides");
       updateBoolFromJSON(&drivetrainEnabled, myStatus, "drivetrainEnabled");
       updateBoolFromJSON(&steeringEnabled, myStatus, "steeringEnabled");
@@ -79,7 +77,9 @@ void processMessage(aJsonObject* myMessage){
     
     aJsonObject* mySwag = aJson.getObjectItem(myMessage, "swag");
     if(mySwag != NULL){
-      printNameAndTypeFromJSON(mySwag, "mySwag");
+      if(jsonDebug){
+        printNameAndTypeFromJSON(mySwag, "mySwag");
+      }
       updateBoolFromJSON(&ubLights, mySwag, "ubLights");
       updateBoolFromJSON(&tailLights, mySwag, "tailLights");
       updateIntFromJSON(&musicId, mySwag, "musicId");
@@ -87,7 +87,9 @@ void processMessage(aJsonObject* myMessage){
     
     aJsonObject* myManual = aJson.getObjectItem(myMessage, "manual");
     if(myManual != NULL){
-      printNameAndTypeFromJSON(myManual, "myManual");
+      if(jsonDebug){
+        printNameAndTypeFromJSON(myManual, "myManual");
+      }
       updateBoolFromJSON(&manualMode, myManual, "manualMode");
       updateFloatFromJSON(&normEsc, myManual, "normEsc");
       updateFloatFromJSON(&normSteering, myManual, "normSteering");
@@ -95,32 +97,44 @@ void processMessage(aJsonObject* myMessage){
     
     aJsonObject* myGPS = aJson.getObjectItem(myMessage, "gps");
     if(myGPS != NULL){
-      printNameAndTypeFromJSON(myGPS, "myGPS");
+      if(jsonDebug){
+        printNameAndTypeFromJSON(myGPS, "myGPS");
+      }
       updateFloatFromJSON(&remoteLat, myGPS, "remoteLat");
       updateFloatFromJSON(&remoteLon, myGPS, "remoteLon");
     }
     
-    Serial.println("Successfully parsed.");
+    if(jsonDebug){
+      Serial.println("Successfully parsed.");
+    }
   }else{
-    Serial.println("Parse failed.");
+    if(jsonDebug){
+      Serial.println("Parse failed.");
+    }
   }
 }
 
 void updateIntFromJSON(int* value, aJsonObject* myJsonObject, char* fieldName){
   aJsonObject* query = aJson.getObjectItem(myJsonObject, fieldName);
-  printNameAndTypeFromJSON(query, fieldName);
+  if(jsonDebug){
+    printNameAndTypeFromJSON(query, fieldName);
+  }
   *value = query->valueint;
 }
 
 void updateFloatFromJSON(float* value, aJsonObject* myJsonObject, char* fieldName){
   aJsonObject* query = aJson.getObjectItem(myJsonObject, fieldName);
-  printNameAndTypeFromJSON(query, fieldName);
+  if(jsonDebug){
+    printNameAndTypeFromJSON(query, fieldName);
+  }
   *value = query->valuefloat;
 }
 
 void updateCharFromJSON(char* value, aJsonObject* myJsonObject, char* fieldName){
   aJsonObject* query = aJson.getObjectItem(myJsonObject, fieldName);
-  printNameAndTypeFromJSON(query, fieldName);
+  if(jsonDebug){
+    printNameAndTypeFromJSON(query, fieldName);
+  }
   // char pointers are funky, because they're usually treated as strings.
   // Here, the function should actually update one char. Hence, the dereferencing operator *. Willing to accept better solutions.
   *value = *(query->valuestring);
@@ -128,7 +142,9 @@ void updateCharFromJSON(char* value, aJsonObject* myJsonObject, char* fieldName)
 
 void updateBoolFromJSON(bool* value, aJsonObject* myJsonObject, char* fieldName){
   aJsonObject* query = aJson.getObjectItem(myJsonObject, fieldName);
-  printNameAndTypeFromJSON(query, fieldName);
+  if(jsonDebug){
+    printNameAndTypeFromJSON(query, fieldName);
+  }
   *value = query->valuebool;
 }
 
