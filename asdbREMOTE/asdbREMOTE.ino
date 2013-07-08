@@ -2,7 +2,9 @@
 #include <Adafruit_PCD8544.h>
 #include <PS2Keyboard.h>
 #include <SoftwareSerial.h>
-#include <TinyGPS.h>
+//#include <TinyGPS.h>
+//#include <Wire.h>
+//#include "nunchuck_funcs.h"
 #define PMTK_SET_NMEA_UPDATE_10HZ "$PMTK220,100*2F"
 #define PMTK_SET_NMEA_OUTPUT_RMCONLY "$PMTK314,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0*29"
 
@@ -69,6 +71,14 @@ float heading = 30.12;
 float gyroYaw = 5.22;
 boolean remoteGPSLock = 1;
 
+//Menu 6
+boolean zButton = 0;
+boolean cButton = 0;
+int joyx = 5;
+int joyy = 5;
+int accx = 5;
+int accy = 5;
+
 void setup()   {
   Serial.begin(57600);
 
@@ -84,6 +94,9 @@ void setup()   {
   display.clearDisplay();   // clears the screen and buffer
   keyboard.begin(DataPin, IRQpin);
   
+  display.setTextSize(1);
+  display.setTextColor(BLACK);
+  
 //  mySerial.begin(9600);
 //  mySerial.println(PMTK_SET_NMEA_OUTPUT_RMCONLY);
 //  mySerial.println(PMTK_SET_NMEA_UPDATE_10HZ);
@@ -97,9 +110,6 @@ void loop(){
   }
  display.clearDisplay();
  if( keyboardCharacter == '1'){
-  display.setTextSize(1);
-  display.setTextColor(BLACK);
-  display.setCursor(0,0);
   display.print(spaces("Overrides:", stopOverrides));
   display.print(spaces("Xbee Stop:", xbeeStop));
   display.print(spaces("Drivetrain:", drivetrainEnabled));
@@ -113,9 +123,6 @@ void loop(){
   
   } 
  if( keyboardCharacter == '2'){
-  display.setTextSize(1);
-  display.setTextColor(BLACK);
-  display.setCursor(0,0);
   display.print(spaces("Auto Mode:", automaticMode));
   display.print(spaces("WayPt Beh:", waypointBehavior));
   display.print(spaces("Adj. Speed:", adjustMySpeed));
@@ -127,9 +134,6 @@ void loop(){
   
   }
  if( keyboardCharacter == '3'){
-  display.setTextSize(1);
-  display.setTextColor(BLACK);
-  display.setCursor(0,0);
   display.print(spaces("CLat:", carLat, 5));
   display.print(spaces("CLon:", carLon, 5));
   display.print(spaces("GLat:", goalLat, 5));
@@ -140,9 +144,6 @@ void loop(){
   }
 
  if( keyboardCharacter == '4'){
-  display.setTextSize(1);
-  display.setTextColor(BLACK);
-  display.setCursor(0,0);
   display.print(spaces("ESC:",escValue));
   display.print(spaces("Servo:", servoValue));
   display.print(spaces("Rfinder:",rangefinderValue, 2));
@@ -152,9 +153,6 @@ void loop(){
   display.display();
   }
    if( keyboardCharacter == '5'){
-  display.setTextSize(1);
-  display.setTextColor(BLACK);
-  display.setCursor(0,0);
   display.print(spaces("Ub Lights:",ubLights));
   display.print(spaces("Tail Lights:", tailLights));
   display.print(spaces("Music:",music));
@@ -163,6 +161,25 @@ void loop(){
   display.print(spaces("R GPS Lock:", remoteGPSLock));
   display.display();
   }
+  if( keyboardCharacter == '6'){
+  display.setCursor(0,0);
+  display.print(spaces("zButton:",zButton));
+//  display.print(spaces("cButton:",cButton));
+//  display.print(spaces("JoyX:",joyx));
+//  display.print(spaces("JoyY:",joyy));
+//  display.print(spaces("AccX:",accx));
+//  display.print(spaces("AccY:",accy));
+  display.display();
+  }
+  /*
+  nunchuck_get_data();
+
+   joyy = nunchuck_joyy();
+   joyx = nunchuck_joyx();
+   accx  = nunchuck_accelx(); // ranges from approx 70 - 182
+   accy  = nunchuck_accely(); // ranges from approx 65 - 173
+   zButton = nunchuck_zbutton();
+   cButton = nunchuck_cbutton(); */
   
     if(keyboardCharacter == '`'){
      backLight = !backLight;
